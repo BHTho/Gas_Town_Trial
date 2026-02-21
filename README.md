@@ -1,30 +1,29 @@
-# Database Schemas
+# IoT Asset Management SaaS - Database Schemas
 
-This project defines database structures using SQLAlchemy (relational) and MongoDB (document) with appropriate indexes.
+This project defines database structures for an IoT Asset Management SaaS using SQLAlchemy (PostgreSQL) and MongoDB with appropriate indexes.
 
-## Assumptions
+## Schema Overview
 
-Given the lack of specific domain requirements, the following assumptions were made:
+The database schema supports multi-tenant IoT asset management with organisations, users, assets, sensors, alarms, notifications, and a marketplace for data sharing.
 
-1. **SQLAlchemy models** represent a typical blog-like application with Users and Posts
-2. **MongoDB indexes** support logging and event tracking systems
-3. **Database choice**: SQLite for simplicity, MongoDB local for document storage
-4. **Environment configuration** via `.env` file
+### PostgreSQL Tables (SQLAlchemy Models)
 
-These schemas can be easily extended or modified when actual domain requirements are provided.
+- **organisations**: Multi-tenancy container with subscription tiers
+- **users**: OAuth-authenticated users with roles
+- **organisation_members**: Membership with roles and permissions
+- **assets**: IoT devices with manufacturer/model metadata
+- **sensors**: Sensors attached to assets with API keys
+- **sensor_labels**: User-assigned labels for sensors
+- **sensor_alarms**: Threshold-based alarm configurations
+- **notifications**: Alarm-triggered notifications to users
+- **marketplace_listings**: Asset data listings for sale
+- **marketplace_purchases**: Purchase records
+- **audit_logs**: Admin action audit trail
 
-## Models
+### MongoDB Collections
 
-### SQLAlchemy Models (in `src/models/sql.py`)
-
-- **User**: `users` table with authentication fields and relationship to posts
-- **Post**: `posts` table with content and foreign key to author
-
-### MongoDB Indexes (in `src/mongodb/indexes.py`)
-
-- **logs collection**: Indexes on timestamp, level+timestamp, service+timestamp
-- **events collection**: Indexes on event_type+created_at, user_id+created_at, session_id
-- **users collection**: Unique indexes on email and username (if MongoDB used for user profiles)
+- **sensor_readings**: Time-series sensor data with TTL index (30 days retention)
+- **asset_models**: Normalized asset model catalog
 
 ## Setup
 
@@ -38,27 +37,33 @@ These schemas can be easily extended or modified when actual domain requirements
    cp .env.example .env
    ```
 
-3. Initialize databases:
+3. Update `.env` with your PostgreSQL and MongoDB connection strings.
+
+4. Initialize databases:
    ```bash
    python scripts/init_db.py
    ```
 
-This will create SQL tables and MongoDB indexes.
+This will create PostgreSQL tables and MongoDB indexes.
 
 ## Configuration
 
-- `DATABASE_URL`: SQLAlchemy database URL (default: SQLite `./app.db`)
+- `DATABASE_URL`: PostgreSQL connection URL (default: `postgresql://postgres:postgres@localhost:5432/iot_assets`)
 - `MONGODB_URL`: MongoDB connection string (default: `mongodb://localhost:27017`)
-- `MONGODB_DB`: MongoDB database name (default: `app`)
+- `MONGODB_DB`: MongoDB database name (default: `iot_assets`)
 
 ## Usage
 
-Import models from `src.models.sql` and use `SessionLocal` from `src.database` for SQL operations.
+Import models from `src.models` and use `SessionLocal` from `src.database` for SQL operations.
 
 Use `mongo_db` from `src.database` for MongoDB operations.
 
-## Extending
+## Schema Details
 
-Add new SQLAlchemy models in `src/models/` and import them in `scripts/init_db.py` to ensure table creation.
+See `scripts/init-dbs.sql` and `scripts/mongo-init.js` for raw SQL and MongoDB initialization scripts.
+
+## Development
+
+Add new SQLAlchemy models in `src/models/` and ensure they are imported in `src.models.__init__.py`.
 
 Add new MongoDB indexes in `src/mongodb/indexes.py`.

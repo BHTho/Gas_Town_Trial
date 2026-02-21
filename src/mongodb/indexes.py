@@ -1,24 +1,40 @@
 from src.database import mongo_db
 
 def create_indexes():
-    """Create MongoDB indexes for collections"""
+    """Create MongoDB indexes for collections as per mongo-init.js"""
 
-    # logs collection indexes
-    logs = mongo_db.logs
-    logs.create_index([("timestamp", -1)], name="timestamp_desc")
-    logs.create_index([("level", 1), ("timestamp", -1)], name="level_timestamp")
-    logs.create_index([("service", 1), ("timestamp", -1)], name="service_timestamp")
+    # sensor_readings collection indexes
+    sensor_readings = mongo_db.sensor_readings
+    sensor_readings.create_index(
+        [("sensor_id", 1), ("timestamp", -1)],
+        name="sensor_timestamp_idx"
+    )
+    sensor_readings.create_index(
+        [("asset_model_key", 1), ("timestamp", -1)],
+        name="asset_model_timestamp_idx"
+    )
+    sensor_readings.create_index(
+        [("is_faulty", 1), ("sensor_id", 1)],
+        name="faulty_sensor_idx"
+    )
+    sensor_readings.create_index(
+        [("asset_fault_detected", 1), ("asset_id", 1)],
+        name="asset_fault_idx"
+    )
+    # TTL index for data retention (30 days by default)
+    sensor_readings.create_index(
+        [("timestamp", 1)],
+        name="timestamp_ttl_idx",
+        expireAfterSeconds=2592000  # 30 days
+    )
 
-    # events collection indexes
-    events = mongo_db.events
-    events.create_index([("event_type", 1), ("created_at", -1)], name="event_type_created_at")
-    events.create_index([("user_id", 1), ("created_at", -1)], name="user_id_created_at")
-    events.create_index([("session_id", 1)], name="session_id")
-
-    # users collection for MongoDB (if used)
-    users = mongo_db.users
-    users.create_index([("email", 1)], unique=True, name="email_unique")
-    users.create_index([("username", 1)], unique=True, name="username_unique")
+    # asset_models collection index
+    asset_models = mongo_db.asset_models
+    asset_models.create_index(
+        [("manufacturer", 1), ("make", 1), ("model", 1), ("year", 1)],
+        name="manufacturer_make_model_year_idx",
+        unique=True
+    )
 
     print("MongoDB indexes created successfully")
 

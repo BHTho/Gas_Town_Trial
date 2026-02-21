@@ -6,7 +6,7 @@ import sys
 sys.path.insert(0, '.')
 
 from src.database import engine, Base
-from src.models.sql import User, Post
+import src.models  # ensures all models are registered with Base
 from src.mongodb.indexes import create_indexes
 
 def init_sql():

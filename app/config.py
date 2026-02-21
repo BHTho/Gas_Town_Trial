@@ -17,12 +17,14 @@ class Settings(BaseSettings):
     secret_key: str = os.getenv("SECRET_KEY", "change_this_in_production")
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
+    refresh_token_expire_days: int = 7
 
     # CORS
     cors_origins: list[str] = ["http://localhost:3000"]
 
     class Config:
         env_file = ".env"
+        extra = "ignore"
 
 
 settings = Settings()

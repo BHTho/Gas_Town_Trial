@@ -1,7 +1,26 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.config import settings
+from app.routers import auth
 
-app = FastAPI(title="Backend API", version="0.1.0")
+app = FastAPI(title=settings.api_title, version=settings.api_version)
+
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Include routers
+app.include_router(auth.router)
 
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
+
+@app.get("/health")
+async def health():
+    return {"status": "healthy"}

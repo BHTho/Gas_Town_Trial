@@ -6,6 +6,7 @@ from datetime import datetime
 from sqlalchemy import String, Boolean, DateTime, Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
+from app.core.security import pwd_context
 
 
 class UserRole(str, enum.Enum):
@@ -34,8 +35,4 @@ class User(Base):
 
     def verify_password(self, password: str) -> bool:
         """Verify password against hashed password."""
-        # This method will be implemented after passlib setup
-        # For now, placeholder
-        from passlib.context import CryptContext
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         return pwd_context.verify(password, self.hashed_password)
